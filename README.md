@@ -15,6 +15,11 @@ Two endpoints will be available on
 * Sets up a github action which runs tests, then builds the binary and then a docker image and uploads to aws ECR
 * Show a way to host TLS with custom SSL certificates
 
+# To run with SSL
+
+```bash
+cargo run -- -c sslexample/server-cert.pem -k sslexample/server.key -s 1337
+```
 
 # What this repo aims to do in the future
 * Configure opentelemetry to post traces to JAEGER or other Opentelemetry compatible endpoints
