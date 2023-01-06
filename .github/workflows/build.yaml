@@ -1,0 +1,107 @@
+name: Build binary
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: ⚡ Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.rustup
+            target
+          key: debug-${{ runner.os }}-stable
+          restore-keys: |
+            debug-${{ runner.os }}-
+      - name: Install rust
+        run: |
+          rustup install stable
+          rustup default stable
+          rustup show
+      - name: Run tests
+        run: cargo test
+  build-binary:
+    runs-on: ubuntu-latest
+    needs: test
+    timeout-minutes: 20
+    steps:
+     - name: Checkout
+        uses: actions/checkout@v3
+      - name: ⚡ Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.rustup
+            target
+          key: release-${{ runner.os }}-stable
+          restore-keys: |
+            release-${{ runner.os }}-
+      - name: Install rust
+        run: |
+          rustup install stable
+          rustup default stable
+          rustup show
+      - name: Install cross (our X compilation tool (need support for arch64))
+        run: |
+          cargo install cross
+      - name: Build binary
+        run: |
+          cargo build --release --target=aarch64-unknown-linux-musl
+      - name: Setup QEMU (to support multi-platform docker)
+        uses: docker/setup-qemu-action@v2
+      - name: Configure AWS credentials (Use cross-replication in ECR for multirepo)
+        id: eu-north
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+      - name: Login to ECR
+        id: login-ecr-eu-north
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Setup docker buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Docker meta configuration (set image and tag)
+        uses: docker/metadata-action@v4
+        id: meta
+        with:
+          images: |
+            ${{ steps.login-ecr-eu-north.outputs.registry}}/unleash-actix-example
+          tags: |
+            type=ref,event=branch
+            type=sha
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+      - name: Build tag and push image to Amazon ECR
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+  notifypipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: build-binary
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Send to pipeline
+        run: |
+          bash ./.github/notify_pipeline.sh
+        env:
+          DOCKER_IMAGE: "726824350591.dkr.ecr.eu-north-1.amazonaws.com/unleash-actix-example"
