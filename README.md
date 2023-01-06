@@ -13,10 +13,10 @@ Two endpoints will be available on
 * Use Clap to parse command line arguments. This will auto-generate a `--help` command for the binary if you're wondering what options there are
 * Sets up a github action clippy action which will give codequality warnings on https://github.com/Unleash/actix-template/security/code-scanning
 * Sets up a github action which runs tests, then builds the binary and then a docker image and uploads to aws ECR
+* Show a way to host TLS with custom SSL certificates
 
 
 # What this repo aims to do in the future
-* Show a way to host TLS with custom SSL certificates
 * Configure opentelemetry to post traces to JAEGER or other Opentelemetry compatible endpoints
 
 
