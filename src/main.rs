@@ -1,5 +1,5 @@
 mod cli;
-use actix_web::{middleware, web, App, HttpResponse, HttpResponseBuilder, HttpServer};
+use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use actix_web_opentelemetry::{PrometheusMetricsHandler, RequestMetricsBuilder, RequestTracing};
 use clap::Parser;
 use opentelemetry::{

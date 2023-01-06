@@ -60,7 +60,7 @@ jobs:
           cargo install cross
       - name: Build binary
         run: |
-          cargo build --release --target=aarch64-unknown-linux-musl
+          cross build --release --target=aarch64-unknown-linux-musl
       - name: Setup QEMU (to support multi-platform docker)
         uses: docker/setup-qemu-action@v2
       - name: Configure AWS credentials (Use cross-replication in ECR for multirepo)
