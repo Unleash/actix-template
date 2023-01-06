@@ -59,8 +59,10 @@ async fn main() -> Result<(), anyhow::Error> {
                     }))),
             )
     })
-    .bind((args.interface.clone(), args.port.clone()))
-    .expect(format!("Could not bind to {}:{}", args.interface, args.port).as_str())
+    .bind((args.interface.clone(), args.port))
+    .unwrap_or_else(|_| {
+        panic!("Could not bind to {}:{}", args.interface, args.port);
+    })
     .shutdown_timeout(5); // Graceful shutdown waits for existing connections for up to n seconds
 
     tokio::select! {
