@@ -1,16 +1,13 @@
 mod cli;
+mod metrics;
 use std::{fs::File, io::BufReader, path::PathBuf};
 
 use actix_tls::accept::rustls::reexports::ServerConfig;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
-use actix_web_opentelemetry::{PrometheusMetricsHandler, RequestMetricsBuilder, RequestTracing};
+use actix_web_opentelemetry::{RequestMetricsBuilder, RequestTracing};
 use clap::Parser;
 use opentelemetry::{
     global,
-    sdk::{
-        export::metrics::aggregation,
-        metrics::{controllers, processors, selectors},
-    },
 };
 use rustls::{Certificate, PrivateKey};
 use rustls_pemfile::{certs, pkcs8_private_keys};
@@ -53,19 +50,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let collector = Registry::default().with(logger).with(env_filter);
     // Initialize tracing
     tracing::subscriber::set_global_default(collector).unwrap();
-    let metrics_handler = {
-        let controller = controllers::basic(
-            processors::factory(
-                selectors::simple::histogram([1.0, 2.0, 5.0, 10.0, 20.0, 50.0]), // Will give histogram for with resolution in n ms
-                aggregation::cumulative_temporality_selector(),
-            )
-            .with_memory(true),
-        )
-        .build();
-
-        let exporter = opentelemetry_prometheus::exporter(controller).init();
-        PrometheusMetricsHandler::new(exporter)
-    };
+    let metrics_handler = metrics::http_metrics_handler(metrics::registry());
     let meter = global::meter("actix_web");
     let request_metrics = RequestMetricsBuilder::new().build(meter);
 
