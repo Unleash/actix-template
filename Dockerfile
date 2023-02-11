@@ -1,4 +1,4 @@
-FROM alpine:3.17.0
+FROM alpine:3.17.2
 
 WORKDIR /app
 COPY target/aarch64-unknown-linux-musl/release/actix-template /app/
