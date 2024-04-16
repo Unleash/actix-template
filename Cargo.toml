@@ -10,7 +10,7 @@ actix-tls = { version = "3.0.3", features = ["rustls"] }
 actix-web = { version = "4.2.1", features = ["rustls", "secure-cookies"] }
 actix-web-opentelemetry = { version = "0.13.0", features = ["metrics", "metrics-prometheus"] }
 anyhow = "1.0.68"
-chrono = { version = "0.4.23", features = ["serde"] }
+chrono = { version = "0.4.38", features = ["serde"] }
 clap = { version = "4.0.32", features = ["derive", "env"] }
 dotenv = { version = "0.15.0", features = ["clap"] }
 opentelemetry = { version = "0.18.0", features = ["trace", "rt-tokio", "metrics"] }
