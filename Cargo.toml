@@ -13,7 +13,7 @@ anyhow = "1.0.68"
 chrono = { version = "0.4.23", features = ["serde"] }
 clap = { version = "4.0.32", features = ["derive", "env"] }
 dotenv = { version = "0.15.0", features = ["clap"] }
-opentelemetry = { version = "0.18.0", features = ["trace", "rt-tokio", "metrics"] }
+opentelemetry = { version = "0.23.0", features = ["trace", "rt-tokio", "metrics"] }
 opentelemetry-prometheus = "0.11.0"
 prometheus = { version = "0.13.3", features = ["process"] }
 rustls = { version = "0.20.7" }
